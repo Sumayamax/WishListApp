@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -40,6 +41,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onAddWish: () -> Unit,
     onWishClick: (Int) -> Unit,
+    onSettingsClick: () -> Unit,
     onStatsClick: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
@@ -48,10 +50,13 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Wishlist", fontWeight = FontWeight.Bold, color = TextGray) },
+                title = { Text("My Wishlist", fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = onStatsClick) {
-                        Icon(Icons.Default.Settings, contentDescription = "Statistics", tint = TextGray)
+                        Icon(Icons.AutoMirrored.Outlined.List, contentDescription = "Statistics")
+                    }
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(Icons.Default.Settings, contentDescription = "Settings")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
@@ -130,7 +135,9 @@ fun BudgetCard(totalBudget: Double, usedBudget: Double, onEditClick: () -> Unit)
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = if (isOverBudget) Color(0xFFFFEBEE) else LightPink)
+        colors = CardDefaults.cardColors(
+            containerColor = if (isOverBudget) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+        )
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(
@@ -144,11 +151,16 @@ fun BudgetCard(totalBudget: Double, usedBudget: Double, onEditClick: () -> Unit)
                         if (totalBudget > 0) "$${String.format("%.2f", usedBudget)} of $${String.format("%.2f", totalBudget)}" 
                         else "No budget set",
                         fontSize = 12.sp, 
-                        color = TextGray.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                     )
                 }
                 IconButton(onClick = onEditClick) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit Budget", modifier = Modifier.size(20.dp), tint = PrimaryPink)
+                    Icon(
+                        Icons.Default.Edit, 
+                        contentDescription = "Edit Budget", 
+                        modifier = Modifier.size(20.dp), 
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
             
@@ -160,14 +172,14 @@ fun BudgetCard(totalBudget: Double, usedBudget: Double, onEditClick: () -> Unit)
                     .fillMaxWidth()
                     .height(8.dp)
                     .clip(CircleShape),
-                color = if (isOverBudget) Color.Red.copy(alpha = 0.6f) else PrimaryPink,
-                trackColor = Color.White
+                color = if (isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.surface
             )
 
             if (isOverBudget) {
                 Text(
                     "You are over budget!", 
-                    color = Color.Red.copy(alpha = 0.7f), 
+                    color = MaterialTheme.colorScheme.error, 
                     fontSize = 11.sp, 
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(top = 4.dp)
@@ -185,11 +197,11 @@ fun EmptyState(modifier: Modifier = Modifier) {
                 Icons.Outlined.FavoriteBorder, 
                 contentDescription = null, 
                 modifier = Modifier.size(80.dp),
-                tint = PrimaryPink.copy(alpha = 0.3f)
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
             )
             Spacer(modifier = Modifier.height(16.dp))
-            Text("No wishes yet", fontWeight = FontWeight.Medium, color = TextGray.copy(alpha = 0.5f))
-            Text("Start by adding your first dream!", fontSize = 14.sp, color = TextGray.copy(alpha = 0.4f))
+            Text("No wishes yet", fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+            Text("Start by adding your first dream!", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
         }
     }
 }
@@ -256,7 +268,7 @@ fun WishCard(wish: WishItem, onToggleStatus: () -> Unit, onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -287,7 +299,7 @@ fun WishCard(wish: WishItem, onToggleStatus: () -> Unit, onClick: () -> Unit) {
                         text = wish.title,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
-                        color = TextGray.copy(alpha = alpha),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha),
                         modifier = Modifier.weight(1f, fill = false)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -298,7 +310,7 @@ fun WishCard(wish: WishItem, onToggleStatus: () -> Unit, onClick: () -> Unit) {
                     Text(
                         text = "$${String.format("%.2f", wish.price)}",
                         fontSize = 14.sp,
-                        color = PrimaryPink.copy(alpha = alpha)
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = alpha)
                     )
                 }
             }
@@ -307,7 +319,7 @@ fun WishCard(wish: WishItem, onToggleStatus: () -> Unit, onClick: () -> Unit) {
                 Icon(
                     imageVector = if (isCompleted) Icons.Default.CheckCircle else Icons.Outlined.CheckCircle,
                     contentDescription = "Toggle Status",
-                    tint = if (isCompleted) PrimaryPink else TextGray.copy(alpha = 0.3f)
+                    tint = if (isCompleted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                 )
             }
         }
@@ -317,7 +329,7 @@ fun WishCard(wish: WishItem, onToggleStatus: () -> Unit, onClick: () -> Unit) {
 @Composable
 fun CategoryTag(label: String) {
     Surface(
-        color = Color.LightGray.copy(alpha = 0.15f),
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f),
         shape = RoundedCornerShape(8.dp)
     ) {
         Text(
@@ -325,7 +337,7 @@ fun CategoryTag(label: String) {
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold,
-            color = TextGray.copy(alpha = 0.5f)
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
         )
     }
 }
@@ -348,12 +360,12 @@ fun BudgetEditDialog(currentBudget: Double, onDismiss: () -> Unit, onSave: (Doub
         },
         confirmButton = {
             TextButton(onClick = { onSave(text.toDoubleOrNull() ?: 0.0) }) {
-                Text("Save", color = PrimaryPink)
+                Text("Save", color = MaterialTheme.colorScheme.primary)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel", color = TextGray)
+                Text("Cancel")
             }
         }
     )
@@ -368,8 +380,8 @@ fun FilterRow(selectedType: String, onTypeSelect: (String) -> Unit) {
                 onClick = { onTypeSelect(type) },
                 label = { Text(type.lowercase().replaceFirstChar { it.uppercase() }) },
                 colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = PrimaryPink,
-                    selectedLabelColor = Color.White
+                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 border = null,
                 shape = RoundedCornerShape(16.dp)
