@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.wishlistapp.ui.add_edit.AddEditScreen
+import com.example.wishlistapp.ui.completed.CompletedScreen
 import com.example.wishlistapp.ui.detail.DetailScreen
 import com.example.wishlistapp.ui.home.HomeScreen
 import com.example.wishlistapp.ui.navigation.Screen
@@ -59,6 +60,9 @@ fun WishNavHost() {
                 },
                 onStatsClick = {
                     navController.navigate(Screen.Stats.route)
+                },
+                onCompletedClick = {
+                    navController.navigate(Screen.Completed.route)
                 }
             )
         }
@@ -71,6 +75,13 @@ fun WishNavHost() {
         }
         composable(Screen.Settings.route) {
             SettingsScreen(
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable(Screen.Completed.route) {
+            CompletedScreen(
                 onBack = {
                     navController.popBackStack()
                 }

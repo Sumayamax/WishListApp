@@ -42,7 +42,8 @@ fun HomeScreen(
     onAddWish: () -> Unit,
     onWishClick: (Int) -> Unit,
     onSettingsClick: () -> Unit,
-    onStatsClick: () -> Unit
+    onStatsClick: () -> Unit,
+    onCompletedClick: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
     var showBudgetDialog by remember { mutableStateOf(false) }
@@ -52,6 +53,9 @@ fun HomeScreen(
             TopAppBar(
                 title = { Text("My Wishlist", fontWeight = FontWeight.Bold) },
                 actions = {
+                    IconButton(onClick = onCompletedClick) {
+                        Icon(Icons.Default.CheckCircle, contentDescription = "Completed")
+                    }
                     IconButton(onClick = onStatsClick) {
                         Icon(Icons.AutoMirrored.Outlined.List, contentDescription = "Statistics")
                     }

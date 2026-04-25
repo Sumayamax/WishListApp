@@ -25,10 +25,11 @@ class HomeViewModel @Inject constructor(
         repository.getAllWishes(),
         preferenceManager.userPreferencesFlow
     ) { wishes, preferences ->
-        val filteredWishes = wishes.filter { wish ->
-            val typeMatch = preferences.filterType == "ALL" || wish.type.name == preferences.filterType
-            val statusMatch = preferences.filterStatus == "ALL" || wish.status.name == preferences.filterStatus
-            typeMatch && statusMatch
+        // Only show active wishes on Home screen
+        val activeWishes = wishes.filter { it.status == WishStatus.WISH }
+        
+        val filteredWishes = activeWishes.filter { wish ->
+            preferences.filterType == "ALL" || wish.type.name == preferences.filterType
         }.let { list ->
             when (preferences.sortBy) {
                 "PRICE_ASC" -> list.sortedBy { it.price ?: 0.0 }
@@ -74,18 +75,6 @@ class HomeViewModel @Inject constructor(
     fun onTypeFilterChanged(type: String) {
         viewModelScope.launch {
             preferenceManager.updateTypeFilter(type)
-        }
-    }
-
-    fun onStatusFilterChanged(status: String) {
-        viewModelScope.launch {
-            preferenceManager.updateStatusFilter(status)
-        }
-    }
-
-    fun onSortByChanged(sortBy: String) {
-        viewModelScope.launch {
-            preferenceManager.updateSortBy(sortBy)
         }
     }
 
