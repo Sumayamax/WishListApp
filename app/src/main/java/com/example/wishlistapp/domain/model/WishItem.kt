@@ -8,5 +8,7 @@ data class WishItem(
     val category: WishCategory = WishCategory.OTHER,
     val price: Double? = null,
     val status: WishStatus = WishStatus.WISH,
+    val imageUrl: String = "",
+    val targetDate: String = "",
     val createdAt: Long = System.currentTimeMillis()
 )

@@ -24,6 +24,7 @@ class PreferenceManager @Inject constructor(@ApplicationContext context: Context
         val FILTER_STATUS = stringPreferencesKey("filter_status")
         val SORT_BY = stringPreferencesKey("sort_by")
         val TOTAL_BUDGET = doublePreferencesKey("total_budget")
+        val DARK_THEME = booleanPreferencesKey("dark_theme")
     }
 
     val userPreferencesFlow: Flow<UserPreferences> = dataStore.data
@@ -39,7 +40,8 @@ class PreferenceManager @Inject constructor(@ApplicationContext context: Context
                 filterType = preferences[PreferencesKeys.FILTER_TYPE] ?: "ALL",
                 filterStatus = preferences[PreferencesKeys.FILTER_STATUS] ?: "ALL",
                 sortBy = preferences[PreferencesKeys.SORT_BY] ?: "DATE",
-                totalBudget = preferences[PreferencesKeys.TOTAL_BUDGET] ?: 0.0
+                totalBudget = preferences[PreferencesKeys.TOTAL_BUDGET] ?: 0.0,
+                isDarkTheme = preferences[PreferencesKeys.DARK_THEME] ?: false
             )
         }
 
@@ -58,11 +60,16 @@ class PreferenceManager @Inject constructor(@ApplicationContext context: Context
     suspend fun updateTotalBudget(budget: Double) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.TOTAL_BUDGET] = budget }
     }
+
+    suspend fun updateDarkTheme(isDark: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.DARK_THEME] = isDark }
+    }
 }
 
 data class UserPreferences(
     val filterType: String,
     val filterStatus: String,
     val sortBy: String,
-    val totalBudget: Double
+    val totalBudget: Double,
+    val isDarkTheme: Boolean
 )
