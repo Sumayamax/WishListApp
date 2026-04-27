@@ -28,7 +28,11 @@ object AppModule {
             WishDatabase::class.java,
             WishDatabase.DATABASE_NAME
         )
-        .addMigrations(WishDatabase.MIGRATION_1_2)
+        .addMigrations(
+            WishDatabase.MIGRATION_1_2, 
+            WishDatabase.MIGRATION_2_3,
+            WishDatabase.MIGRATION_3_4
+        )
         .build()
     }
 

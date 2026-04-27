@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -20,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.wishlistapp.domain.model.WishItem
-import com.example.wishlistapp.ui.home.WishCard
+import com.example.wishlistapp.ui.home.PinterestWishCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,9 +84,17 @@ fun SwipeableCompletedWishCard(
 ) {
     val dismissState = rememberSwipeToDismissBoxState()
 
-    if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
-        val isUndo = dismissState.currentValue == SwipeToDismissBoxValue.StartToEnd
-        if (isUndo) onUndo() else onDelete()
+    LaunchedEffect(dismissState.currentValue) {
+        when (dismissState.currentValue) {
+            SwipeToDismissBoxValue.EndToStart -> {
+                onDelete()
+            }
+            SwipeToDismissBoxValue.StartToEnd -> {
+                onUndo()
+                dismissState.reset()
+            }
+            else -> {}
+        }
     }
 
     SwipeToDismissBox(
@@ -111,7 +120,7 @@ fun SwipeableCompletedWishCard(
             }
         },
         content = {
-            WishCard(wish = wish, onToggleStatus = onUndo, onClick = {})
+            PinterestWishCard(wish = wish, onClick = {})
         }
     )
 }

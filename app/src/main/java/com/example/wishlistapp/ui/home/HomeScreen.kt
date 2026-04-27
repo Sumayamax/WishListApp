@@ -1,15 +1,13 @@
 package com.example.wishlistapp.ui.home
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.filled.*
@@ -19,21 +17,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.wishlistapp.domain.model.WishItem
 import com.example.wishlistapp.domain.model.WishStatus
 import com.example.wishlistapp.domain.model.WishType
 import com.example.wishlistapp.ui.theme.AccentLavender
 import com.example.wishlistapp.ui.theme.LightPink
 import com.example.wishlistapp.ui.theme.PrimaryPink
-import com.example.wishlistapp.ui.theme.TextGray
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -101,16 +99,16 @@ fun HomeScreen(
             if (state.wishes.isEmpty()) {
                 EmptyState(modifier = Modifier.weight(1f))
             } else {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                LazyVerticalStaggeredGrid(
+                    columns = StaggeredGridCells.Fixed(2),
+                    verticalItemSpacing = 12.dp,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                     contentPadding = PaddingValues(bottom = 80.dp),
                     modifier = Modifier.weight(1f)
                 ) {
                     items(state.wishes, key = { it.id }) { wish ->
-                        SwipeableWishCard(
+                        PinterestWishCard(
                             wish = wish,
-                            onToggleStatus = { viewModel.onToggleStatus(wish) },
-                            onDelete = { viewModel.onDeleteWish(wish) },
                             onClick = { onWishClick(wish.id) }
                         )
                     }
@@ -127,6 +125,108 @@ fun HomeScreen(
                 viewModel.onUpdateBudget(it)
                 showBudgetDialog = false
             }
+        )
+    }
+}
+
+@Composable
+fun PinterestWishCard(wish: WishItem, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column {
+            if (wish.imageUrl.isNotBlank()) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(wish.imageUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "Wish Image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
+                    contentScale = ContentScale.FillWidth
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                        .background(if (wish.type == WishType.THING) LightPink else AccentLavender),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (wish.type == WishType.THING) Icons.Outlined.ShoppingCart else Icons.Outlined.Star,
+                        contentDescription = null,
+                        tint = if (wish.type == WishType.THING) PrimaryPink else Color(0xFF9B81FF),
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+            }
+
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text(
+                    text = wish.title,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    maxLines = 2,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                
+                if (wish.price != null && wish.type == WishType.THING) {
+                    Text(
+                        text = "$${String.format("%.2f", wish.price)}",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+
+                if (wish.targetDate.isNotBlank()) {
+                    Row(
+                        modifier = Modifier.padding(top = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.CalendarMonth,
+                            contentDescription = null,
+                            modifier = Modifier.size(12.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = wish.targetDate,
+                            fontSize = 10.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                CategoryTag(wish.category.displayName)
+            }
+        }
+    }
+}
+
+@Composable
+fun CategoryTag(label: String) {
+    Surface(
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+        shape = RoundedCornerShape(6.dp)
+    ) {
+        Text(
+            text = label,
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
     }
 }
@@ -210,142 +310,6 @@ fun EmptyState(modifier: Modifier = Modifier) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SwipeableWishCard(
-    wish: WishItem,
-    onToggleStatus: () -> Unit,
-    onDelete: () -> Unit,
-    onClick: () -> Unit
-) {
-    val dismissState = rememberSwipeToDismissBoxState()
-
-    LaunchedEffect(dismissState.currentValue) {
-        when (dismissState.currentValue) {
-            SwipeToDismissBoxValue.EndToStart -> {
-                onDelete()
-            }
-            SwipeToDismissBoxValue.StartToEnd -> {
-                onToggleStatus()
-                dismissState.reset()
-            }
-            else -> {}
-        }
-    }
-
-    SwipeToDismissBox(
-        state = dismissState,
-        backgroundContent = {
-            val color = when (dismissState.dismissDirection) {
-                SwipeToDismissBoxValue.StartToEnd -> Color.Green.copy(alpha = 0.2f)
-                SwipeToDismissBoxValue.EndToStart -> Color.Red.copy(alpha = 0.2f)
-                else -> Color.Transparent
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(color)
-                    .padding(horizontal = 20.dp),
-                contentAlignment = if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) Alignment.CenterStart else Alignment.CenterEnd
-            ) {
-                if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) {
-                    Icon(Icons.Default.Check, contentDescription = null, tint = Color.Green)
-                } else {
-                    Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red)
-                }
-            }
-        },
-        content = {
-            WishCard(wish = wish, onToggleStatus = onToggleStatus, onClick = onClick)
-        }
-    )
-}
-
-@Composable
-fun WishCard(wish: WishItem, onToggleStatus: () -> Unit, onClick: () -> Unit) {
-    val isCompleted = wish.status == WishStatus.COMPLETED
-    val alpha = if (isCompleted) 0.6f else 1f
-    
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(if (wish.type == WishType.THING) LightPink else AccentLavender),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = if (wish.type == WishType.THING) Icons.Outlined.ShoppingCart else Icons.Outlined.Star,
-                    contentDescription = null,
-                    tint = if (wish.type == WishType.THING) PrimaryPink else Color(0xFF9B81FF)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = wish.title,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha),
-                        modifier = Modifier.weight(1f, fill = false)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    CategoryTag(wish.category.displayName)
-                }
-                
-                if (wish.price != null && wish.type == WishType.THING) {
-                    Text(
-                        text = "$${String.format("%.2f", wish.price)}",
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = alpha)
-                    )
-                }
-            }
-
-            IconButton(onClick = onToggleStatus) {
-                Icon(
-                    imageVector = if (isCompleted) Icons.Default.CheckCircle else Icons.Outlined.CheckCircle,
-                    contentDescription = "Toggle Status",
-                    tint = if (isCompleted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun CategoryTag(label: String) {
-    Surface(
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f),
-        shape = RoundedCornerShape(8.dp)
-    ) {
-        Text(
-            text = label,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-        )
-    }
-}
-
 @Composable
 fun BudgetEditDialog(currentBudget: Double, onDismiss: () -> Unit, onSave: (Double) -> Unit) {
     var text by remember { mutableStateOf(currentBudget.toString()) }
@@ -358,7 +322,7 @@ fun BudgetEditDialog(currentBudget: Double, onDismiss: () -> Unit, onSave: (Doub
                 value = text,
                 onValueChange = { text = it },
                 label = { Text("Amount") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
                 shape = RoundedCornerShape(12.dp)
             )
         },

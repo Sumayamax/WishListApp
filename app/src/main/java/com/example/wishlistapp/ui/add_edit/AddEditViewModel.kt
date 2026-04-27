@@ -37,7 +37,9 @@ class AddEditViewModel @Inject constructor(
                             type = wish.type,
                             category = wish.category,
                             price = wish.price?.toString() ?: "",
-                            status = wish.status
+                            status = wish.status,
+                            imageUrl = wish.imageUrl,
+                            targetDate = wish.targetDate
                         )
                     }
                 }
@@ -65,6 +67,14 @@ class AddEditViewModel @Inject constructor(
         _state.value = _state.value.copy(price = price)
     }
 
+    fun onImageUrlChanged(imageUrl: String) {
+        _state.value = _state.value.copy(imageUrl = imageUrl)
+    }
+
+    fun onTargetDateChanged(date: String) {
+        _state.value = _state.value.copy(targetDate = date)
+    }
+
     fun onSaveWish() {
         if (_state.value.title.isBlank()) {
             _state.value = _state.value.copy(isTitleError = true)
@@ -80,7 +90,9 @@ class AddEditViewModel @Inject constructor(
                     type = _state.value.type,
                     category = _state.value.category,
                     price = _state.value.price.toDoubleOrNull(),
-                    status = _state.value.status
+                    status = _state.value.status,
+                    imageUrl = _state.value.imageUrl,
+                    targetDate = _state.value.targetDate
                 )
             )
             _state.value = _state.value.copy(isSaved = true)

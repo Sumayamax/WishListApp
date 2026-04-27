@@ -11,6 +11,8 @@ data class AddEditState(
     val category: WishCategory = WishCategory.OTHER,
     val price: String = "",
     val status: WishStatus = WishStatus.WISH,
+    val imageUrl: String = "",
+    val targetDate: String = "",
     val isTitleError: Boolean = false,
     val isSaved: Boolean = false
 )
