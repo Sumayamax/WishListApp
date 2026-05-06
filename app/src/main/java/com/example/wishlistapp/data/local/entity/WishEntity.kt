@@ -17,6 +17,8 @@ data class WishEntity(
     val category: String = "OTHER",
     val price: Double?,
     val status: String,
+    val imageUrl: String = "",
+    val targetDate: String = "",
     val createdAt: Long
 ) {
     fun toWishItem(): WishItem = WishItem(
@@ -27,6 +29,8 @@ data class WishEntity(
         category = try { WishCategory.valueOf(category) } catch (e: Exception) { WishCategory.OTHER },
         price = price,
         status = WishStatus.valueOf(status),
+        imageUrl = imageUrl,
+        targetDate = targetDate,
         createdAt = createdAt
     )
 
@@ -39,6 +43,8 @@ data class WishEntity(
             category = item.category.name,
             price = item.price,
             status = item.status.name,
+            imageUrl = item.imageUrl,
+            targetDate = item.targetDate,
             createdAt = item.createdAt
         )
     }

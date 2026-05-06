@@ -6,7 +6,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.icons.outlined.Star
@@ -40,7 +40,7 @@ fun DetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Details", fontWeight = FontWeight.Bold, color = TextGray) },
+                title = { Text("Details", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -49,11 +49,13 @@ fun DetailScreen(
                 actions = {
                     if (wish != null) {
                         IconButton(onClick = { onEdit(wish.id) }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red.copy(alpha = 0.6f))
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Edit"
+                            )
                         }
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                }
             )
         }
     ) { padding ->
@@ -86,7 +88,7 @@ fun DetailScreen(
                     text = wish.title,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextGray
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 if (wish.price != null && wish.type == WishType.THING) {
@@ -94,7 +96,7 @@ fun DetailScreen(
                         text = "$${wish.price}",
                         fontSize = 22.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = PrimaryPink,
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(top = 8.dp)
                     )
                 }
@@ -103,14 +105,14 @@ fun DetailScreen(
 
                 Surface(
                     shape = CircleShape,
-                    color = if (wish.status == WishStatus.COMPLETED) PrimaryPink.copy(alpha = 0.1f) else Color.LightGray.copy(alpha = 0.2f),
+                    color = if (wish.status == WishStatus.COMPLETED) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
                 ) {
                     Text(
                         text = wish.status.name,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (wish.status == WishStatus.COMPLETED) PrimaryPink else TextGray.copy(alpha = 0.6f)
+                        color = if (wish.status == WishStatus.COMPLETED) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -121,15 +123,14 @@ fun DetailScreen(
                         text = "Description",
                         modifier = Modifier.fillMaxWidth(),
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = TextGray
+                        fontSize = 16.sp
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = wish.description,
                         modifier = Modifier.fillMaxWidth(),
                         fontSize = 16.sp,
-                        color = TextGray.copy(alpha = 0.7f),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         lineHeight = 24.sp
                     )
                 }
@@ -142,8 +143,8 @@ fun DetailScreen(
                         .fillMaxWidth()
                         .height(56.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (wish.status == WishStatus.COMPLETED) Color.LightGray.copy(alpha = 0.2f) else PrimaryPink,
-                        contentColor = if (wish.status == WishStatus.COMPLETED) TextGray else Color.White
+                        containerColor = if (wish.status == WishStatus.COMPLETED) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primary,
+                        contentColor = if (wish.status == WishStatus.COMPLETED) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimary
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
@@ -159,12 +160,12 @@ fun DetailScreen(
                     onClick = { viewModel.onDeleteWish { onBack() } },
                     modifier = Modifier.padding(top = 8.dp)
                 ) {
-                    Text("Delete Wish", color = Color.Red.copy(alpha = 0.6f))
+                    Text("Delete Wish", color = MaterialTheme.colorScheme.error)
                 }
             }
         } else if (state.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = PrimaryPink)
+                CircularProgressIndicator()
             }
         }
     }
