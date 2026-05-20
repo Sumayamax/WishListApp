@@ -1,0 +1,69 @@
+<resources>
+    <string name="app_name">Список Желаний</string>
+    <string name="my_wishlist">Мои Желания</string>
+    <string name="add_wish">Добавить</string>
+    <string name="edit_wish">Редактировать</string>
+    <string name="details">Детали</string>
+    <string name="settings">Настройки</string>
+    <string name="statistics">Статистика</string>
+    <string name="completed_wishes">Выполнено</string>
+    <string name="no_wishes_yet">Желаний пока нет</string>
+    <string name="start_adding_dream">Начни с добавления первой мечты!</string>
+
+    <string name="title">Название</string>
+    <string name="description">Описание</string>
+    <string name="description_optional">Описание (необязательно)</string>
+    <string name="price">Цена</string>
+    <string name="type">Тип</string>
+    <string name="category">Категория</string>
+    <string name="save_wish">Сохранить</string>
+
+    <string name="dark_theme">Темная тема</string>
+    <string name="enable_dark_mode">Включить темный режим</string>
+    <string name="language">Язык</string>
+    <string name="choose_language">Выберите язык приложения</string>
+    <string name="change">Изменить</string>
+
+    <string name="choose_photo">Выбрать фото</string>
+    <string name="paste_image_url">Вставить ссылку на картинку</string>
+    <string name="target_date_label">Когда ты это хочешь?</string>
+    <string name="target_date_placeholder">например: Лето 2026</string>
+
+    <string name="suggestions">Предложения</string>
+    <string name="mark_as_completed">Отметить как выполнено</string>
+    <string name="mark_as_active">Вернуть в активные</string>
+    <string name="delete_wish">Удалить желание</string>
+    <string name="undo">Вернуть</string>
+    <string name="delete">Удалить</string>
+    <string name="no_completed_wishes">Завершенных желаний нет</string>
+
+    <string name="budget_plan">Бюджетный план</string>
+    <string name="no_budget_set">Бюджет не установлен</string>
+    <string name="over_budget">Вы превысили бюджет!</string>
+    <string name="set_total_budget">Установить бюджет</string>
+    <string name="amount">Сумма</string>
+    <string name="save">Сохранить</string>
+    <string name="cancel">Отмена</string>
+
+    <string name="overall_progress">Общий прогресс</string>
+    <string name="wishes_achieved_format">Исполнено %1$d из %2$d</string>
+    <string name="cost_analysis">Анализ стоимости</string>
+    <string name="total_estimated">Общая оценка</string>
+    <string name="total_completed_cost">Стоимость исполненных</string>
+    <string name="remaining_needed">Нужно накопить</string>
+    <string name="things">Товары</string>
+    <string name="experiences">Впечатления</string>
+
+    <string name="category_tech">Техника</string>
+    <string name="category_clothes">Одежда</string>
+    <string name="category_travel">Путешествия</string>
+    <string name="category_growth">Саморазвитие</string>
+    <string name="category_other">Другое</string>
+
+    <string name="status_active">Активно</string>
+    <string name="status_completed">Исполнено</string>
+
+    <string name="type_all">Все</string>
+    <string name="type_thing">Товар</string>
+    <string name="type_experience">Впечатление</string>
+</resources>

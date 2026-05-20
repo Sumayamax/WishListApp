@@ -7,7 +7,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.*
@@ -16,16 +15,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.example.wishlistapp.R
 import com.example.wishlistapp.domain.model.WishStatus
 import com.example.wishlistapp.domain.model.WishType
 import com.example.wishlistapp.ui.theme.AccentLavender
 import com.example.wishlistapp.ui.theme.LightPink
 import com.example.wishlistapp.ui.theme.PrimaryPink
-import com.example.wishlistapp.ui.theme.TextGray
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,7 +45,7 @@ fun DetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Details", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.details), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -67,33 +72,49 @@ fun DetailScreen(
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clip(RoundedCornerShape(32.dp))
-                        .background(if (wish.type == WishType.THING) LightPink else AccentLavender),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = if (wish.type == WishType.THING) Icons.Outlined.ShoppingCart else Icons.Outlined.Star,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = if (wish.type == WishType.THING) PrimaryPink else Color(0xFF9B81FF)
+                // Feature 2: Fix missing image in Details
+                if (wish.imageUrl.isNotBlank()) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(wish.imageUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "Wish Image",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(250.dp)
+                            .clip(RoundedCornerShape(24.dp)),
+                        contentScale = ContentScale.Crop
                     )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clip(RoundedCornerShape(32.dp))
+                            .background(if (wish.type == WishType.THING) LightPink else AccentLavender),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = if (wish.type == WishType.THING) Icons.Outlined.ShoppingCart else Icons.Outlined.Star,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = if (wish.type == WishType.THING) PrimaryPink else Color(0xFF9B81FF)
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
                     text = wish.title,
-                    fontSize = 28.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
                 if (wish.price != null && wish.type == WishType.THING) {
                     Text(
-                        text = "$${wish.price}",
+                        text = "$${String.format(Locale.US, "%.2f", wish.price)}",
                         fontSize = 22.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary,
@@ -108,7 +129,7 @@ fun DetailScreen(
                     color = if (wish.status == WishStatus.COMPLETED) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
                 ) {
                     Text(
-                        text = wish.status.name,
+                        text = stringResource(wish.status.resId),
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
@@ -120,7 +141,7 @@ fun DetailScreen(
 
                 if (wish.description.isNotEmpty()) {
                     Text(
-                        text = "Description",
+                        text = stringResource(R.string.description),
                         modifier = Modifier.fillMaxWidth(),
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
@@ -129,9 +150,9 @@ fun DetailScreen(
                     Text(
                         text = wish.description,
                         modifier = Modifier.fillMaxWidth(),
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                        lineHeight = 24.sp
+                        lineHeight = 22.sp
                     )
                 }
 
@@ -148,10 +169,9 @@ fun DetailScreen(
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Icon(Icons.Outlined.CheckCircle, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (wish.status == WishStatus.COMPLETED) "Mark as Active" else "Mark as Completed",
+                        text = if (wish.status == WishStatus.COMPLETED) stringResource(R.string.mark_as_active) 
+                               else stringResource(R.string.mark_as_completed),
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -160,7 +180,7 @@ fun DetailScreen(
                     onClick = { viewModel.onDeleteWish { onBack() } },
                     modifier = Modifier.padding(top = 8.dp)
                 ) {
-                    Text("Delete Wish", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.delete_wish), color = MaterialTheme.colorScheme.error)
                 }
             }
         } else if (state.isLoading) {

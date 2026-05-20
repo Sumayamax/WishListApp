@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val settingsViewModel: SettingsViewModel = hiltViewModel()
             val isDarkTheme by settingsViewModel.isDarkTheme.collectAsState()
-            
+
             WishListAppTheme(darkTheme = isDarkTheme) {
                 WishNavHost()
             }
@@ -49,75 +49,36 @@ fun WishNavHost() {
     ) {
         composable(Screen.Home.route) {
             HomeScreen(
-                onAddWish = {
-                    navController.navigate(Screen.AddEdit.passWishId())
-                },
-                onWishClick = { wishId ->
-                    navController.navigate(Screen.Detail.passWishId(wishId))
-                },
-                onSettingsClick = {
-                    navController.navigate(Screen.Settings.route)
-                },
-                onStatsClick = {
-                    navController.navigate(Screen.Stats.route)
-                },
-                onCompletedClick = {
-                    navController.navigate(Screen.Completed.route)
-                }
+                onAddWish = { navController.navigate(Screen.AddEdit.passWishId()) },
+                onWishClick = { wishId -> navController.navigate(Screen.Detail.passWishId(wishId)) },
+                onSettingsClick = { navController.navigate(Screen.Settings.route) },
+                onStatsClick = { navController.navigate(Screen.Stats.route) },
+                onCompletedClick = { navController.navigate(Screen.Completed.route) }
             )
         }
-        composable(Screen.Stats.route) {
-            StatsScreen(
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
+        composable(Screen.Stats.route) { 
+            StatsScreen(onBack = { navController.popBackStack() }) 
         }
-        composable(Screen.Settings.route) {
-            SettingsScreen(
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
+        composable(Screen.Settings.route) { 
+            SettingsScreen(onBack = { navController.popBackStack() }) 
         }
-        composable(Screen.Completed.route) {
-            CompletedScreen(
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
+        composable(Screen.Completed.route) { 
+            CompletedScreen(onBack = { navController.popBackStack() })
         }
         composable(
             route = Screen.Detail.route,
-            arguments = listOf(
-                navArgument("wishId") {
-                    type = NavType.IntType
-                }
-            )
+            arguments = listOf(navArgument("wishId") { type = NavType.IntType })
         ) {
             DetailScreen(
-                onBack = {
-                    navController.popBackStack()
-                },
-                onEdit = { wishId ->
-                    navController.navigate(Screen.AddEdit.passWishId(wishId))
-                }
+                onBack = { navController.popBackStack() },
+                onEdit = { wishId -> navController.navigate(Screen.AddEdit.passWishId(wishId)) }
             )
         }
         composable(
             route = Screen.AddEdit.route,
-            arguments = listOf(
-                navArgument("wishId") {
-                    type = NavType.IntType
-                    defaultValue = -1
-                }
-            )
+            arguments = listOf(navArgument("wishId") { type = NavType.IntType; defaultValue = -1 })
         ) {
-            AddEditScreen(
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
+            AddEditScreen(onBack = { navController.popBackStack() })
         }
     }
 }

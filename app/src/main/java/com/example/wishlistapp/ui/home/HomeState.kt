@@ -7,6 +7,7 @@ data class HomeState(
     val wishes: List<WishItem> = emptyList(),
     val userPreferences: UserPreferences = UserPreferences("ALL", "ALL", "DATE", 0.0, false),
     val isLoading: Boolean = false,
+    val error: String? = null,
     val totalWishes: Int = 0,
     val completedWishes: Int = 0,
     val progressPercentage: Float = 0f,

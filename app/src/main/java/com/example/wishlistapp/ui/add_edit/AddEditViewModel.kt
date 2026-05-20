@@ -5,12 +5,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.wishlistapp.data.remote.dto.ProductDto
 import com.example.wishlistapp.domain.model.WishCategory
 import com.example.wishlistapp.domain.model.WishItem
 import com.example.wishlistapp.domain.model.WishStatus
 import com.example.wishlistapp.domain.model.WishType
 import com.example.wishlistapp.domain.repository.WishRepository
+import com.example.wishlistapp.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,6 +28,7 @@ class AddEditViewModel @Inject constructor(
     val state: State<AddEditState> = _state
 
     private var currentWishId: Int? = null
+    private var searchJob: Job? = null
 
     init {
         savedStateHandle.get<Int>("wishId")?.let { wishId ->
@@ -49,6 +54,51 @@ class AddEditViewModel @Inject constructor(
 
     fun onTitleChanged(title: String) {
         _state.value = _state.value.copy(title = title, isTitleError = false)
+        searchProducts(title)
+    }
+
+    private fun searchProducts(query: String) {
+        searchJob?.cancel()
+        val trimmedQuery = query.trim()
+        if (trimmedQuery.length < 2) {
+            _state.value = _state.value.copy(suggestions = emptyList(), isSearching = false)
+            return
+        }
+
+        searchJob = viewModelScope.launch {
+            delay(500)
+            _state.value = _state.value.copy(isSearching = true)
+            
+            // Обработка результата через Resource (Senior подход)
+            when (val result = repository.searchProducts(trimmedQuery)) {
+                is Resource.Success -> {
+                    _state.value = _state.value.copy(
+                        suggestions = result.data ?: emptyList(),
+                        isSearching = false
+                    )
+                }
+                is Resource.Error -> {
+                    _state.value = _state.value.copy(
+                        suggestions = emptyList(), 
+                        isSearching = false
+                        // В будущем можно добавить уведомление об ошибке (Snackbar)
+                    )
+                }
+                is Resource.Loading -> {
+                    _state.value = _state.value.copy(isSearching = true)
+                }
+            }
+        }
+    }
+
+    fun onSuggestionSelected(product: ProductDto) {
+        _state.value = _state.value.copy(
+            title = product.title,
+            price = product.price.toString(),
+            imageUrl = product.image,
+            description = product.description,
+            suggestions = emptyList()
+        )
     }
 
     fun onDescriptionChanged(description: String) {
@@ -68,7 +118,7 @@ class AddEditViewModel @Inject constructor(
     }
 
     fun onImageUrlChanged(imageUrl: String) {
-        _state.value = _state.value.copy(imageUrl = imageUrl)
+        _state.value = _state.value.copy(imageUrl = imageUrl.trim())
     }
 
     fun onTargetDateChanged(date: String) {
