@@ -1,6 +1,5 @@
 package com.example.wishlistapp.ui.completed
 
-import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,12 +15,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.wishlistapp.R
 import com.example.wishlistapp.domain.model.WishItem
-import com.example.wishlistapp.ui.home.PinterestWishCard
+import com.example.wishlistapp.ui.components.PinterestWishCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,7 +34,7 @@ fun CompletedScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Completed Wishes", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.completed_wishes), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -51,7 +51,7 @@ fun CompletedScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    "No completed wishes yet",
+                    stringResource(R.string.no_completed_wishes),
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 )
             }
@@ -100,22 +100,22 @@ fun SwipeableCompletedWishCard(
     SwipeToDismissBox(
         state = dismissState,
         backgroundContent = {
-            val color = when (dismissState.dismissDirection) {
-                SwipeToDismissBoxValue.StartToEnd -> Color.Blue.copy(alpha = 0.2f)
-                SwipeToDismissBoxValue.EndToStart -> Color.Red.copy(alpha = 0.2f)
-                else -> Color.Transparent
+            val alignment = when (dismissState.dismissDirection) {
+                SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+                SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
+                else -> Alignment.Center
             }
+            
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 20.dp),
-                contentAlignment = if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) 
-                    Alignment.CenterStart else Alignment.CenterEnd
+                contentAlignment = alignment
             ) {
                 if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) {
-                    Icon(Icons.Default.Refresh, contentDescription = "Undo")
-                } else {
-                    Icon(Icons.Default.Delete, contentDescription = "Delete")
+                    Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.undo))
+                } else if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
+                    Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete))
                 }
             }
         },

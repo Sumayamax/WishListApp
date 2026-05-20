@@ -1,13 +1,14 @@
 package com.example.wishlistapp.ui.detail
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.wishlistapp.domain.model.WishStatus
 import com.example.wishlistapp.domain.repository.WishRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,36 +18,40 @@ class DetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _state = mutableStateOf(DetailState())
-    val state: State<DetailState> = _state
+    private val _state = MutableStateFlow(DetailState())
+    val state = _state.asStateFlow()
 
     init {
         savedStateHandle.get<Int>("wishId")?.let { wishId ->
-            viewModelScope.launch {
-                _state.value = _state.value.copy(isLoading = true)
-                val wish = repository.getWishById(wishId)
-                _state.value = _state.value.copy(wish = wish, isLoading = false)
+            if (wishId != -1) {
+                loadWish(wishId)
             }
+        }
+    }
+
+    private fun loadWish(wishId: Int) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            val wish = repository.getWishById(wishId)
+            _state.update { it.copy(wish = wish, isLoading = false) }
         }
     }
 
     fun onToggleStatus() {
-        state.value.wish?.let { wish ->
-            viewModelScope.launch {
-                val newStatus = if (wish.status == WishStatus.WISH) WishStatus.COMPLETED else WishStatus.WISH
-                val updatedWish = wish.copy(status = newStatus)
-                repository.updateWish(updatedWish)
-                _state.value = _state.value.copy(wish = updatedWish)
-            }
+        val currentWish = _state.value.wish ?: return
+        viewModelScope.launch {
+            val newStatus = if (currentWish.status == WishStatus.WISH) WishStatus.COMPLETED else WishStatus.WISH
+            val updatedWish = currentWish.copy(status = newStatus)
+            repository.updateWish(updatedWish)
+            _state.update { it.copy(wish = updatedWish) }
         }
     }
 
     fun onDeleteWish(onDeleted: () -> Unit) {
-        state.value.wish?.let { wish ->
-            viewModelScope.launch {
-                repository.deleteWish(wish)
-                onDeleted()
-            }
+        val currentWish = _state.value.wish ?: return
+        viewModelScope.launch {
+            repository.deleteWish(currentWish)
+            onDeleted()
         }
     }
 }

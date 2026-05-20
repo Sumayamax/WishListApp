@@ -1,3 +1,66 @@
 <resources>
     <string name="app_name">WishListApp</string>
+    <string name="my_wishlist">My Wishlist</string>
+    <string name="add_wish">Add Wish</string>
+    <string name="edit_wish">Edit Wish</string>
+    <string name="details">Details</string>
+    <string name="settings">Settings</string>
+    <string name="statistics">Statistics</string>
+    <string name="completed_wishes">Completed Wishes</string>
+    <string name="no_wishes_yet">No wishes yet</string>
+    <string name="start_adding_dream">Start by adding your first dream!</string>
+
+    <string name="title">Title</string>
+    <string name="description">Description</string>
+    <string name="description_optional">Description (Optional)</string>
+    <string name="price">Price</string>
+    <string name="type">Type</string>
+    <string name="category">Category</string>
+    <string name="save_wish">Save Wish</string>
+
+    <string name="dark_theme">Dark Theme</string>
+    <string name="enable_dark_mode">Enable dark mode for the app</string>
+
+    <string name="choose_photo">Choose Photo</string>
+    <string name="paste_image_url">Paste Image URL</string>
+    <string name="target_date_label">When do you want this?</string>
+    <string name="target_date_placeholder">e.g. Summer 2026</string>
+
+    <string name="suggestions">Suggestions</string>
+    <string name="mark_as_completed">Mark as Completed</string>
+    <string name="mark_as_active">Mark as Active</string>
+    <string name="delete_wish">Delete Wish</string>
+    <string name="undo">Undo</string>
+    <string name="delete">Delete</string>
+    <string name="no_completed_wishes">No completed wishes yet</string>
+
+    <string name="budget_plan">Budget Plan</string>
+    <string name="no_budget_set">No budget set</string>
+    <string name="over_budget">You are over budget!</string>
+    <string name="set_total_budget">Set Total Budget</string>
+    <string name="amount">Amount</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="overall_progress">Overall Progress</string>
+    <string name="wishes_achieved_format">%1$d of %2$d wishes achieved</string>
+    <string name="cost_analysis">Cost Analysis</string>
+    <string name="total_estimated">Total Estimated</string>
+    <string name="total_completed_cost">Total Completed</string>
+    <string name="remaining_needed">Remaining Needed</string>
+    <string name="things">Things</string>
+    <string name="experiences">Experiences</string>
+
+    <string name="category_tech">Tech</string>
+    <string name="category_clothes">Clothes</string>
+    <string name="category_travel">Travel</string>
+    <string name="category_growth">Self-growth</string>
+    <string name="category_other">Other</string>
+
+    <string name="status_active">Active</string>
+    <string name="status_completed">Completed</string>
+
+    <string name="type_all">All</string>
+    <string name="type_thing">Thing</string>
+    <string name="type_experience">Experience</string>
 </resources>

@@ -16,13 +16,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.wishlistapp.R
 import com.example.wishlistapp.ui.theme.LightPink
 import com.example.wishlistapp.ui.theme.PrimaryPink
 import com.example.wishlistapp.ui.theme.TextGray
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,19 +38,18 @@ fun StatsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Statistics", fontWeight = FontWeight.Bold, color = TextGray) },
+                title = { Text(stringResource(R.string.statistics), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                }
             )
         }
     ) { padding ->
         if (state.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = PrimaryPink)
+                CircularProgressIndicator()
             }
         } else {
             Column(
@@ -60,9 +62,13 @@ fun StatsScreen(
             ) {
                 // Progress Summary Card
                 StatsSummaryCard(
-                    title = "Overall Progress",
+                    title = stringResource(R.string.overall_progress),
                     value = "${(state.completionRate * 100).toInt()}%",
-                    subtitle = "${state.completedWishes} of ${state.totalWishes} wishes achieved",
+                    subtitle = stringResource(
+                        R.string.wishes_achieved_format,
+                        state.completedWishes,
+                        state.totalWishes
+                    ),
                     progress = state.completionRate
                 )
 
@@ -70,18 +76,32 @@ fun StatsScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        Text("Cost Analysis", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextGray)
+                        Text(
+                            stringResource(R.string.cost_analysis),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        CostRow("Total Estimated", "$${String.format("%.2f", state.totalCost)}")
-                        CostRow("Total Completed", "$${String.format("%.2f", state.completedCost)}", color = PrimaryPink)
+                        CostRow(
+                            stringResource(R.string.total_estimated),
+                            "$${String.format(Locale.US, "%.2f", state.totalCost)}"
+                        )
+                        CostRow(
+                            stringResource(R.string.total_completed_cost),
+                            "$${String.format(Locale.US, "%.2f", state.completedCost)}",
+                            color = PrimaryPink
+                        )
                         
                         val remainingCost = state.totalCost - state.completedCost
-                        CostRow("Remaining Needed", "$${String.format("%.2f", if (remainingCost > 0) remainingCost else 0.0)}")
+                        CostRow(
+                            stringResource(R.string.remaining_needed),
+                            "$${String.format(Locale.US, "%.2f", if (remainingCost > 0) remainingCost else 0.0)}"
+                        )
                     }
                 }
 
@@ -89,13 +109,13 @@ fun StatsScreen(
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     TypeCountCard(
                         modifier = Modifier.weight(1f),
-                        label = "Things",
+                        label = stringResource(R.string.things),
                         count = state.thingsCount,
                         color = LightPink
                     )
                     TypeCountCard(
                         modifier = Modifier.weight(1f),
-                        label = "Experiences",
+                        label = stringResource(R.string.experiences),
                         count = state.experiencesCount,
                         color = Color(0xFFE8D7FF) // AccentLavender
                     )
@@ -135,14 +155,14 @@ fun StatsSummaryCard(title: String, value: String, subtitle: String, progress: F
 }
 
 @Composable
-fun CostRow(label: String, value: String, color: Color = TextGray) {
+fun CostRow(label: String, value: String, color: Color = MaterialTheme.colorScheme.onSurface) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(label, color = TextGray.copy(alpha = 0.6f))
+        Text(label, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
         Text(value, fontWeight = FontWeight.SemiBold, color = color)
     }
 }
