@@ -1,9 +1,11 @@
 package com.example.wishlistapp.data.repository
 
 import com.example.wishlistapp.data.local.dao.WishDao
-import com.example.wishlistapp.data.local.entity.WishEntity
+import com.example.wishlistapp.data.mapper.toEntity
+import com.example.wishlistapp.data.mapper.toProduct
+import com.example.wishlistapp.data.mapper.toWishItem
 import com.example.wishlistapp.data.remote.DummyJsonApi
-import com.example.wishlistapp.data.remote.dto.ProductDto
+import com.example.wishlistapp.domain.model.Product
 import com.example.wishlistapp.domain.model.WishItem
 import com.example.wishlistapp.domain.model.WishStatus
 import com.example.wishlistapp.domain.model.WishType
@@ -15,6 +17,10 @@ import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
+/**
+ * Implementation of the WishRepository.
+ * Uses Clean Architecture Mappers to convert between Database Entities and Domain Models.
+ */
 class WishRepositoryImpl @Inject constructor(
     private val dao: WishDao,
     private val api: DummyJsonApi
@@ -31,15 +37,15 @@ class WishRepositoryImpl @Inject constructor(
     }
 
     override suspend fun insertWish(wish: WishItem) {
-        dao.insertWish(WishEntity.fromWishItem(wish))
+        dao.insertWish(wish.toEntity())
     }
 
     override suspend fun updateWish(wish: WishItem) {
-        dao.updateWish(WishEntity.fromWishItem(wish))
+        dao.updateWish(wish.toEntity())
     }
 
     override suspend fun deleteWish(wish: WishItem) {
-        dao.deleteWish(WishEntity.fromWishItem(wish))
+        dao.deleteWish(wish.toEntity())
     }
 
     override fun getWishesByType(type: WishType): Flow<List<WishItem>> {
@@ -54,16 +60,17 @@ class WishRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun searchProducts(query: String): Resource<List<ProductDto>> {
+    override suspend fun searchProducts(query: String): Resource<List<Product>> {
         return try {
             val response = api.searchProducts(query)
-            Resource.Success(response.products)
+            // Senior Level: Map DTO list to Domain model list immediately
+            Resource.Success(response.products.map { it.toProduct() })
         } catch (e: IOException) {
             Resource.Error("Couldn't reach server. Check your internet connection.")
         } catch (e: HttpException) {
             Resource.Error("Server error: ${e.code()}. Please try again later.")
         } catch (e: Exception) {
-            Resource.Error("An unexpected error occurred: ${e.localizedMessage}")
+            Resource.Error("An unexpected error occurred: ${e.localizedMessage ?: "Unknown error"}")
         }
     }
 }

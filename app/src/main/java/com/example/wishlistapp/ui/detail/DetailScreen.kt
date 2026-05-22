@@ -1,5 +1,6 @@
 package com.example.wishlistapp.ui.detail
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -11,6 +12,8 @@ import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,7 +42,8 @@ fun DetailScreen(
     onBack: () -> Unit,
     onEdit: (Int) -> Unit
 ) {
-    val state = viewModel.state.value
+    // Senior Level: Use collectAsState() to observe StateFlow reactively
+    val state by viewModel.state.collectAsState()
     val wish = state.wish
 
     Scaffold(
@@ -64,129 +68,166 @@ fun DetailScreen(
             )
         }
     ) { padding ->
-        if (wish != null) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Feature 2: Fix missing image in Details
-                if (wish.imageUrl.isNotBlank()) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(wish.imageUrl)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = "Wish Image",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(250.dp)
-                            .clip(RoundedCornerShape(24.dp)),
-                        contentScale = ContentScale.Crop
+        // Use Crossfade for smooth transitions between Loading and Content
+        Crossfade(
+            targetState = state.isLoading,
+            modifier = Modifier.padding(padding),
+            label = "DetailContentAnimation"
+        ) { isLoading ->
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = PrimaryPink)
+                }
+            } else if (wish != null) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    WishImage(wish.imageUrl, wish.type)
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Text(
+                        text = wish.title,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .size(120.dp)
-                            .clip(RoundedCornerShape(32.dp))
-                            .background(if (wish.type == WishType.THING) LightPink else AccentLavender),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = if (wish.type == WishType.THING) Icons.Outlined.ShoppingCart else Icons.Outlined.Star,
-                            contentDescription = null,
-                            modifier = Modifier.size(64.dp),
-                            tint = if (wish.type == WishType.THING) PrimaryPink else Color(0xFF9B81FF)
+
+                    if (wish.price != null && wish.type == WishType.THING) {
+                        Text(
+                            text = "$${String.format(Locale.US, "%.2f", wish.price)}",
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(top = 8.dp)
                         )
                     }
-                }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                    text = wish.title,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                    StatusTag(wish.status)
 
-                if (wish.price != null && wish.type == WishType.THING) {
-                    Text(
-                        text = "$${String.format(Locale.US, "%.2f", wish.price)}",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(top = 8.dp)
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    if (wish.description.isNotEmpty()) {
+                        DescriptionSection(wish.description)
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    ActionButtons(
+                        status = wish.status,
+                        onToggle = viewModel::onToggleStatus,
+                        onDelete = { viewModel.onDeleteWish { onBack() } }
                     )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Surface(
-                    shape = CircleShape,
-                    color = if (wish.status == WishStatus.COMPLETED) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                ) {
-                    Text(
-                        text = stringResource(wish.status.resId),
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (wish.status == WishStatus.COMPLETED) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                if (wish.description.isNotEmpty()) {
-                    Text(
-                        text = stringResource(R.string.description),
-                        modifier = Modifier.fillMaxWidth(),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = wish.description,
-                        modifier = Modifier.fillMaxWidth(),
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                        lineHeight = 22.sp
-                    )
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Button(
-                    onClick = { viewModel.onToggleStatus() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (wish.status == WishStatus.COMPLETED) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primary,
-                        contentColor = if (wish.status == WishStatus.COMPLETED) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimary
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text(
-                        text = if (wish.status == WishStatus.COMPLETED) stringResource(R.string.mark_as_active) 
-                               else stringResource(R.string.mark_as_completed),
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                
-                TextButton(
-                    onClick = { viewModel.onDeleteWish { onBack() } },
-                    modifier = Modifier.padding(top = 8.dp)
-                ) {
-                    Text(stringResource(R.string.delete_wish), color = MaterialTheme.colorScheme.error)
                 }
             }
-        } else if (state.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
+        }
+    }
+}
+
+@Composable
+private fun WishImage(imageUrl: String, type: WishType) {
+    if (imageUrl.isNotBlank()) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(imageUrl)
+                .crossfade(true)
+                .build(),
+            contentDescription = "Wish Image",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp)
+                .clip(RoundedCornerShape(24.dp)),
+            contentScale = ContentScale.Crop
+        )
+    } else {
+        Box(
+            modifier = Modifier
+                .size(120.dp)
+                .clip(RoundedCornerShape(32.dp))
+                .background(if (type == WishType.THING) LightPink else AccentLavender),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = if (type == WishType.THING) Icons.Outlined.ShoppingCart else Icons.Outlined.Star,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+                tint = if (type == WishType.THING) PrimaryPink else Color(0xFF9B81FF)
+            )
+        }
+    }
+}
+
+@Composable
+private fun StatusTag(status: WishStatus) {
+    Surface(
+        shape = CircleShape,
+        color = if (status == WishStatus.COMPLETED) MaterialTheme.colorScheme.primaryContainer 
+                else MaterialTheme.colorScheme.surfaceVariant,
+    ) {
+        Text(
+            text = stringResource(status.resId),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = if (status == WishStatus.COMPLETED) MaterialTheme.colorScheme.primary 
+                    else MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun DescriptionSection(description: String) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.description),
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = description,
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            lineHeight = 22.sp
+        )
+    }
+}
+
+@Composable
+private fun ActionButtons(
+    status: WishStatus,
+    onToggle: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Column {
+        Button(
+            onClick = onToggle,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (status == WishStatus.COMPLETED) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primary,
+                contentColor = if (status == WishStatus.COMPLETED) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimary
+            ),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Text(
+                text = if (status == WishStatus.COMPLETED) stringResource(R.string.mark_as_active) 
+                       else stringResource(R.string.mark_as_completed),
+                fontWeight = FontWeight.Bold
+            )
+        }
+        
+        TextButton(
+            onClick = onDelete,
+            modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 8.dp)
+        ) {
+            Text(stringResource(R.string.delete_wish), color = MaterialTheme.colorScheme.error)
         }
     }
 }

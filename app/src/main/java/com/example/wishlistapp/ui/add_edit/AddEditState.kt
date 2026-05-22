@@ -1,6 +1,6 @@
 package com.example.wishlistapp.ui.add_edit
 
-import com.example.wishlistapp.data.remote.dto.ProductDto
+import com.example.wishlistapp.domain.model.Product
 import com.example.wishlistapp.domain.model.WishCategory
 import com.example.wishlistapp.domain.model.WishStatus
 import com.example.wishlistapp.domain.model.WishType
@@ -17,7 +17,7 @@ data class AddEditState(
     val isTitleError: Boolean = false,
     val isSaved: Boolean = false,
     
-    // API Search related
-    val suggestions: List<ProductDto> = emptyList(),
+    // API Search related - Updated to use Domain Model
+    val suggestions: List<Product> = emptyList(),
     val isSearching: Boolean = false
 )

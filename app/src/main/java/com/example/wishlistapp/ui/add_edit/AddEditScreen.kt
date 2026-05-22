@@ -34,7 +34,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.wishlistapp.R
-import com.example.wishlistapp.data.remote.dto.ProductDto
+import com.example.wishlistapp.domain.model.Product
 import com.example.wishlistapp.domain.model.WishCategory
 import com.example.wishlistapp.domain.model.WishType
 import com.example.wishlistapp.ui.theme.LightPink
@@ -221,9 +221,9 @@ private fun TitleSearchSection(
     title: String,
     isError: Boolean,
     isSearching: Boolean,
-    suggestions: List<ProductDto>,
+    suggestions: List<Product>,
     onTitleChange: (String) -> Unit,
-    onSuggestionSelected: (ProductDto) -> Unit
+    onSuggestionSelected: (Product) -> Unit
 ) {
     Column {
         OutlinedTextField(
@@ -354,7 +354,7 @@ private fun WishDatePickerDialog(onDateSaved: (String) -> Unit, onDismiss: () ->
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(onClick = { onDismiss() }) {
                 Text(stringResource(R.string.cancel), color = TextGray)
             }
         }
@@ -364,7 +364,7 @@ private fun WishDatePickerDialog(onDateSaved: (String) -> Unit, onDismiss: () ->
 }
 
 @Composable
-private fun SearchSuggestionCard(product: ProductDto, onClick: () -> Unit) {
+private fun SearchSuggestionCard(product: Product, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .width(150.dp)
@@ -374,7 +374,7 @@ private fun SearchSuggestionCard(product: ProductDto, onClick: () -> Unit) {
     ) {
         Column {
             AsyncImage(
-                model = product.image,
+                model = product.imageUrl,
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -418,7 +418,7 @@ private fun CategoryDropdown(
             onValueChange = {},
             readOnly = true,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor().fillMaxWidth(),
+            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             colors = defaultTextFieldColors()
         )
