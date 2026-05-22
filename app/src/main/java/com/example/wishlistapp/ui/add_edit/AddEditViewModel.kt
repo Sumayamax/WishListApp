@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.wishlistapp.data.remote.dto.ProductDto
+import com.example.wishlistapp.domain.model.Product
 import com.example.wishlistapp.domain.model.WishCategory
 import com.example.wishlistapp.domain.model.WishItem
 import com.example.wishlistapp.domain.model.WishStatus
@@ -69,7 +69,6 @@ class AddEditViewModel @Inject constructor(
             delay(500)
             _state.value = _state.value.copy(isSearching = true)
             
-            // Обработка результата через Resource (Senior подход)
             when (val result = repository.searchProducts(trimmedQuery)) {
                 is Resource.Success -> {
                     _state.value = _state.value.copy(
@@ -81,7 +80,6 @@ class AddEditViewModel @Inject constructor(
                     _state.value = _state.value.copy(
                         suggestions = emptyList(), 
                         isSearching = false
-                        // В будущем можно добавить уведомление об ошибке (Snackbar)
                     )
                 }
                 is Resource.Loading -> {
@@ -91,11 +89,11 @@ class AddEditViewModel @Inject constructor(
         }
     }
 
-    fun onSuggestionSelected(product: ProductDto) {
+    fun onSuggestionSelected(product: Product) {
         _state.value = _state.value.copy(
             title = product.title,
             price = product.price.toString(),
-            imageUrl = product.image,
+            imageUrl = product.imageUrl,
             description = product.description,
             suggestions = emptyList()
         )

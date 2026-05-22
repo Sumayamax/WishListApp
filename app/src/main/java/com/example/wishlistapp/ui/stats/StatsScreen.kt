@@ -1,6 +1,9 @@
 package com.example.wishlistapp.ui.stats
 
-import androidx.compose.foundation.background
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -47,83 +50,95 @@ fun StatsScreen(
             )
         }
     ) { padding ->
-        if (state.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 20.dp)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                // Progress Summary Card
-                StatsSummaryCard(
-                    title = stringResource(R.string.overall_progress),
-                    value = "${(state.completionRate * 100).toInt()}%",
-                    subtitle = stringResource(
-                        R.string.wishes_achieved_format,
-                        state.completedWishes,
-                        state.totalWishes
-                    ),
-                    progress = state.completionRate
-                )
-
-                // Cost Analysis Card
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Text(
-                            stringResource(R.string.cost_analysis),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        CostRow(
-                            stringResource(R.string.total_estimated),
-                            "$${String.format(Locale.US, "%.2f", state.totalCost)}"
-                        )
-                        CostRow(
-                            stringResource(R.string.total_completed_cost),
-                            "$${String.format(Locale.US, "%.2f", state.completedCost)}",
-                            color = PrimaryPink
-                        )
-                        
-                        val remainingCost = state.totalCost - state.completedCost
-                        CostRow(
-                            stringResource(R.string.remaining_needed),
-                            "$${String.format(Locale.US, "%.2f", if (remainingCost > 0) remainingCost else 0.0)}"
-                        )
-                    }
+        Crossfade(
+            targetState = state.isLoading,
+            modifier = Modifier.padding(padding),
+            label = "StatsLoadingAnimation"
+        ) { isLoading ->
+            if (isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = PrimaryPink)
                 }
-
-                // Type Breakdown
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    TypeCountCard(
-                        modifier = Modifier.weight(1f),
-                        label = stringResource(R.string.things),
-                        count = state.thingsCount,
-                        color = LightPink
-                    )
-                    TypeCountCard(
-                        modifier = Modifier.weight(1f),
-                        label = stringResource(R.string.experiences),
-                        count = state.experiencesCount,
-                        color = Color(0xFFE8D7FF) // AccentLavender
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
+            } else {
+                StatsContent(state = state)
             }
         }
+    }
+}
+
+@Composable
+private fun StatsContent(state: StatsState) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Progress Summary Card
+        StatsSummaryCard(
+            title = stringResource(R.string.overall_progress),
+            value = "${(state.completionRate * 100).toInt()}%",
+            subtitle = stringResource(
+                R.string.wishes_achieved_format,
+                state.completedWishes,
+                state.totalWishes
+            ),
+            progress = state.completionRate
+        )
+
+        // Cost Analysis Card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(
+                    stringResource(R.string.cost_analysis),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                CostRow(
+                    stringResource(R.string.total_estimated),
+                    "$${String.format(Locale.US, "%.2f", state.totalCost)}"
+                )
+                CostRow(
+                    stringResource(R.string.total_completed_cost),
+                    "$${String.format(Locale.US, "%.2f", state.completedCost)}",
+                    color = PrimaryPink
+                )
+                
+                val remainingCost = state.totalCost - state.completedCost
+                CostRow(
+                    stringResource(R.string.remaining_needed),
+                    "$${String.format(Locale.US, "%.2f", if (remainingCost > 0) remainingCost else 0.0)}"
+                )
+            }
+        }
+
+        // Type Breakdown
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            TypeCountCard(
+                modifier = Modifier.weight(1f),
+                label = stringResource(R.string.things),
+                count = state.thingsCount,
+                color = LightPink
+            )
+            TypeCountCard(
+                modifier = Modifier.weight(1f),
+                label = stringResource(R.string.experiences),
+                count = state.experiencesCount,
+                color = Color(0xFFE8D7FF) // AccentLavender
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
     }
 }
 
